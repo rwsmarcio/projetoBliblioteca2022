@@ -5,12 +5,11 @@ const rota = express.Router();
 
 const livroController = require('../controller/livro_controller');
 
-rota.get('/', livroController.listar);
-rota.post('/', livroController.inserir);
-rota.get('/:livro_id', livroController.buscarPorId);
-//busca livros do autor
-rota.get('/obra/:autor_id', livroController.buscarPorAutor);
-rota.put('/:livro_id', livroController.atualizar);
-rota.delete('/:livro_id', livroController.deletar);
+rota.get('/', livroController.listar); // lista livros
+rota.post('/', livroController.inserir); // adiciona um livro
+rota.get('/:livro_id', livroController.buscarPorId); // busca livro por ID
+rota.get('/obra/:autor_id', livroController.buscarPorAutor); //busca livros do autor
+rota.put('/:livro_id', livroController.atualizar); // altera informações de um livro
+rota.delete('/:livro_id', livroController.deletar); // deleta livro por ID
 
 module.exports = rota;
