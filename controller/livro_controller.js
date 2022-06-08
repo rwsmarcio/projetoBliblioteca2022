@@ -1,15 +1,14 @@
-const livroRepository = require('../repository/livro_repository');
+//const livroRepository = require('../repository/livro_repository');
+const livroNegocio = require('../negocio/livro_negocio');
 
 
-exports.listar = (req, res) => {    
-    livroRepository.listar((err, listalivros) => {
-        if(err) { 
-            res.status(500).json({ msg: err.msg }) 
-        }
-        else {
-            res.json(listalivros);
-        }
-    })
+exports.listar = async (req, res) => {    
+    try{
+        const listaLivros = await livroNegocio.listar();
+        res.json(listaLivros);
+    } catch (err) {
+        res.status(500).jason({error: err});
+    }
 }
 
 
@@ -27,6 +26,19 @@ exports.buscarPorId = (req, res) => {
         }    
     });
 }
+
+exports.buscarPorId = async (req, res) => {
+    const id = req.params.livro_id;
+    try{ 
+        const livro = await livroNegocio.buscarPorId(id);
+        res.json(livro);
+    } catch (err) {
+        res.status(404).json({msg:"Livro não encontrado."});
+        //res.status(500).jason({error: err});
+    }
+}
+
+
 
 exports.buscarPorAutor = (req, res) => {
     const id = req.params.autor_id;

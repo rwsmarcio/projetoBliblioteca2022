@@ -8,15 +8,15 @@ const conexao = {
     password: '040389'
 };
 
-//Conexao com banco de dados
-exports.listar = (callback) => {
-
+exports.listar = async () => {
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query('SELECT * FROM livros', (err, res) => {
-        callback(err,res.rows);
+    try{ 
+        const resultado = await cliente.query("SELECT * FROM livros");
         cliente.end();
-    });
+        return (resultado.rows);
+    }
+    catch (err) { throw err; }
 }
 
 exports.inserir = (livro, callback) => {
