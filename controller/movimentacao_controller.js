@@ -1,89 +1,99 @@
-const movimentacaoRepository = require('../repository/movimentacao_repository');
+//////////////////////////////////////////////////////////////////////////
 
+const movimentacaoNegocio = require('../negocio/movimentacao_negocio');
 
-exports.listar = (req, res) => {    
-    movimentacaoRepository.listar((err, listamovimentacoes) => {
-        if(err) { 
-            res.status(500).json({ msg: err.msg }) 
-        }
-        else {
-            res.json(listamovimentacoes);
-        }
-    })
+//////////////////////////////////////////////////////////////////////////
+
+exports.listar = async (req, res) => {    
+    try{
+        const listamovimentacoes = await movimentacaoNegocio.listar();
+        res.json(listamovimentacoes);
+    } catch (err) {
+        res.status(500).jason({error: err});
+    }
 }
 
+//////////////////////////////////////////////////////////////////////////
 
-exports.buscarPorId = (req, res) => {
+exports.inserir = async (req, res) => {
+    const movimentacao = req.body;
+
+    try{
+        const movimentacaoInserida = await movimentacaoNegocio.inserir(movimentacao);
+        res.status(201).json(movimentacaoInserida);
+    }
+    catch(err) {
+        if(err.status) {
+            res.status(err.status).json(err);
+        } else {
+            res.status(400).json({msg:"Entrada de dados invalida"});
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+exports.buscarPorId = async (req, res) => {
     const id = req.params.movimentacao_id;
-    movimentacaoRepository.buscarPorId (id, (err, movimentacaoEncontrado) => {
-        if(err) { 
-            res.status(500).json({ msg: err }) 
+    try{ 
+        const movimentacao = await movimentacaoNegocio.buscarPorId(id);
+        res.json(movimentacao);
+    } catch (err) {
+        if (err.status) {
+            res.status(err.status).json(err);
+        } else {
+        res.status(500).json({msg:"Movimentação não encontrada"});
         }
-        else if(movimentacaoEncontrado) {
-            res.json(movimentacaoEncontrado);
-        }
-        else {
-            res.status(404).json({msg:"Movimentacao nao encontrado"});
-        }    
-    });
+    }
 }
 
-exports.buscarPorUsuario = (req, res) => {
+//////////////////////////////////////////////////////////////////////////
+
+exports.buscarPorUsuario = async (req, res) => {
     const id = req.params.usuario_id;
-    movimentacaoRepository.buscarPorUsuario (id, (err, movimentacaoEncontrado) => {
-        if(err) { 
-            res.status(500).json({ msg: err }) 
+    try{ 
+        const resultado = await movimentacaoNegocio.buscarPorUsuario(id);
+        res.json(resultado);
+    } catch (err) {
+        if (err.status) {res.status(err.status).json(err);
+        } else {
+            res.status(500).json({msg:"Lista de movimentações não encontrada"});
         }
-        else if(movimentacaoEncontrado) {
-            res.json(movimentacaoEncontrado);
-        }
-        else {
-            res.status(404).json({msg:"Movimentacao não encontrado"});
-        }    
-    });
-}
-
-exports.inserir = (req, res) => {
-    let movimentacao = req.body;
-    if(movimentacao && movimentacao.usuario_id && movimentacao.livro_id && movimentacao.data_retirada && movimentacao.data_devolucao) {
-        movimentacaoRepository.inserir(movimentacao, (err, movimentacaoInserido) => {
-            if(err) { 
-                res.status(500).json({ msg: err.msg }) 
-            }
-            else {
-                res.status(201).send(movimentacao);
-            }
-        });    
-    }
-    else {
-        //Bad Request
-        res.status(400).json({msg:"Entrada de dados invalida"});
     }
 }
 
-exports.atualizar = (req, res) => {
-    const id = req.params.movimentacao_id;
-    const movimentacaoAtualizar = req.body;
+//////////////////////////////////////////////////////////////////////////
 
-    movimentacaoRepository.atualizar(id, movimentacaoAtualizar, (err, movimentacaoAtualizado) => {
-        if(err) { 
-            res.status(500).json({ msg: err }) 
+exports.atualizar = async (req, res) => {
+    const id = req.params.movimentacao_id;
+    const movimentacaoAtualizacao = req.body;
+
+    try{
+        const movimentacaoAtualizada = await movimentacaoNegocio.atualizar(id, movimentacaoAtualizacao);
+        res.status(201).json(movimentacaoAtualizada)
+    } catch(err) {
+        if(err.status) {
+            res.status(err.status).json(err);
+        } else {
+            res.status(400).json({msg:"Entrada de dados invalida"});            
         }
-        else {
-            res.json(movimentacaoAtualizado);
-        }        
-    })
+    }
 }
 
-exports.deletar = (req, res) => {
-    const id = req.params.movimentacao_id;
+//////////////////////////////////////////////////////////////////////////
 
-    movimentacaoRepository.deletar(id, (err, movimentacaoAtualizado) => {
-        if(err) { 
-            res.status(500).json({ msg: err.msg }) 
+exports.deletar = async (req, res) => {
+    const id = req.params.movimentacao_id;
+    try{ 
+        const movimentacao = await movimentacaoNegocio.deletar(id);
+        res.json(movimentacao);
+    } catch(err) {
+        if (err.status) {
+            res.status(err.status).json(err);
+        } else {
+        res.status(400).json({msg:"Movimentação inexistente"});
         }
-        else {
-            res.json(movimentacaoAtualizado);
-        }        
-    })
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////

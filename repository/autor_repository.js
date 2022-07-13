@@ -1,3 +1,5 @@
+//////////////////////////////////////////////////////////////////////////
+
 const { Client } = require('pg');
 
 const conexao = {
@@ -8,89 +10,118 @@ const conexao = {
     password: '040389'
 };
 
-//Conexao com banco de dados
-exports.listar = (callback) => {
+//////////////////////////////////////////////////////////////////////////
 
+exports.listar = async () => {
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query('SELECT * FROM autores', (err, res) => {
-        callback(err,res.rows);
+    try{ 
+        const resultado = await cliente.query("SELECT * FROM autores");
         cliente.end();
-    });
+        return (resultado.rows);
+    } catch (err) { 
+        throw err; 
+    }
 }
 
-exports.inserir = (autor, callback) => {
+//////////////////////////////////////////////////////////////////////////
+
+exports.inserir = async (autor) => {
     const sql = "INSERT INTO autores(nome) VALUES ($1) RETURNING *";
     const values = [autor.nome];
 
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query(sql, values, (err, res) => { 
-        callback(err, res.rows[0]);
+    
+    try{
+        const resultado = await cliente.query(sql, values);
         cliente.end();
-    });
+        return(resultado.rows[0]);
+    } catch (err) {
+        let error = {};
+        error.name = "Repository error";
+        error.message = "Faltam dados para inserção";
+        error.status = 500;
+        throw error;
+    }
 }
 
-exports.buscarPorId = (autor_id, callback) => {
+//////////////////////////////////////////////////////////////////////////
+
+exports.buscarPorId = async (autor_id) => {
     const sql = "SELECT * FROM autores WHERE autor_id=$1";
     const values = [autor_id];
 
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query(sql, values, (err, res) => { 
-        if(err){
-            callback(err, null);
-        }
-        else if(res.rows && res.rows.length > 0) {
-            callback(null, res.rows[0]);
-        }
-        else {
-            const error = "Autor não encontrado!";
-            callback(error, null);
-        }
+
+    try{
+        const resultado = await cliente.query(sql, values);
         cliente.end();
-    });
+        if (resultado.rowCount == 0){
+            throw error;
+        } else {
+            return(resultado.rows);
+        }        
+    } catch (err) {
+        let error = {};
+        error.name = "Repository Error";
+        error.message = "Não existe autor registrado para este ID";
+        error.status = 404; 
+        throw error; 
+    }
 }
 
-exports.atualizar = (autor_id, autor, callback) => {
+//////////////////////////////////////////////////////////////////////////
+
+exports.atualizar = async (autor_id, autor) => {
     const sql = "UPDATE autores SET nome=$1 WHERE autor_id=$2 RETURNING *";
     const values = [autor.nome, autor_id];
 
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query(sql, values, (err, res) => { 
-        if(err){
-            callback(err, null);
-        }
-        else if(res.rows && res.rows.length > 0) {
-            callback(null, res.rows[0]);
-        }
-        else {
-            const error = "Autor não encontrado!";
-            callback(error, null);
-        }
+    
+    try{
+        const autorAtualizado = await cliente.query(sql, values);
         cliente.end();
-    });    
+        if (autorAtualizado.rowCount == 0) {
+            throw error; 
+        } else {
+            return(autorAtualizado.rows);
+        };
+    } catch (err) { 
+        let error = {};
+        error.name = "Repository Error";
+        error.message = "ID referida não existe";
+        error.status = 404; 
+        throw error; 
+    }
 }
 
-exports.deletar = (autor_id, callback) => {
+//////////////////////////////////////////////////////////////////////////
+
+exports.deletar = async (autor_id) => {
     const sql = "DELETE FROM autores WHERE autor_id=$1 RETURNING *";
     const values = [autor_id];
 
     const cliente = new Client(conexao);
     cliente.connect();
-    cliente.query(sql, values, (err, res) => { 
-        if(err){
-            callback(err, null);
-        }
-        else if(res.rowCount > 0) {
-            callback(null, res.rows[0]);
-        }
-        else {
-            const error = "Autor não encontrado!";
-            callback(error, null);
-        }
+    
+    try{
+        const resultado = await cliente.query(sql, values);
         cliente.end();
-    });
+        if(resultado.rowCount == 0){
+            throw error; 
+        } else {
+            return(resultado.rows);
+        }
+    } catch (err) {
+        let error = {};
+        error.name = "Repository error";
+        error.message = "ID referida não existe";
+        error.status = 404; 
+        throw error; 
+    }
 }
 
+//////////////////////////////////////////////////////////////////////////

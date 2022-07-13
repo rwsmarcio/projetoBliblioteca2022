@@ -1,25 +1,25 @@
 //////////////////////////////////////////////////////////////////////////
 
-const livroRepository = require('../repository/livro_repository');
+const autorRepository = require('../repository/autor_repository');
 
 //////////////////////////////////////////////////////////////////////////
 
 exports.listar = async () => {
     try { 
-        const listaLivros = await livroRepository.listar();
-        return listaLivros;
+        const listaAutores = await autorRepository.listar();
+        return listaAutores;
     } catch(err) { 
         throw err; 
     }
-}
+} 
 
 //////////////////////////////////////////////////////////////////////////
 
-exports.inserir = async (livro) => {
+exports.inserir = async (autor) => {
     try{
-        if (livro && livro.titulo && livro.autor_id) {
-            const livroInserido = await livroRepository.inserir(livro);
-            return livroInserido;
+        if (autor && autor.nome) {
+            const autorInserido = await autorRepository.inserir(autor);
+            return autorInserido;
         } else {
             let error = {}
             error.name = "Nogocio error";
@@ -36,14 +36,14 @@ exports.inserir = async (livro) => {
 
 exports.buscarPorId = async (id) => {
     try {
-        const livro = await livroRepository.buscarPorId(id);
-        if (!livro) {
+        const autor = await autorRepository.buscarPorId(id);
+        if (!autor) {
             let error = {};
-            error.mensagem = "Livro não encontrado";
+            error.mensagem = "Autor não encontrado";
             error.status = 404;
             throw error;
         } else {
-            return livro;
+            return autor;
         }
     } catch(err) {
         throw err;
@@ -54,7 +54,7 @@ exports.buscarPorId = async (id) => {
 
 exports.buscarPorAutor = async (id) => {
     try {
-        const obra = await livroRepository.buscarPorAutor(id);
+        const obra = await autorRepository.buscarPorAutor(id);
         if (!obra) {
             throw err;
         } else {
@@ -67,19 +67,15 @@ exports.buscarPorAutor = async (id) => {
 
 //////////////////////////////////////////////////////////////////////////
 
-exports.atualizar = async (id, livroAtualizacao) => {
+exports.atualizar = async (id, autorAtualizacao) => {
     try {
-        if (livroAtualizacao && livroAtualizacao.titulo){
-        const livroAtualizado = await livroRepository.atualizar(id, livroAtualizacao);
-        return livroAtualizado;
+        const autorAtualizado = await autorRepository.atualizar(id, autorAtualizacao);
+        if (!autorAtualizado) {
+            throw err;
         } else {
-            let error = {};
-            error.name = "Negocio error";
-            error.mensagem = "Entrada de Dados inválida";
-            error.status = 404;
-            throw error;
+            return autorAtualizado;
         }
-    } catch (err) {
+    } catch(err) {
         throw err; 
     }     
 }
@@ -88,12 +84,12 @@ exports.atualizar = async (id, livroAtualizacao) => {
 
 exports.deletar = async (id) => {
     try {
-        const livro = await livroRepository.deletar(id);
-        if(!livro){
+        const autor = await autorRepository.deletar(id);
+        if(!autor){
             throw err;
         }
         else {
-            return livro;
+            return autor;
         };
     } catch(err) {
         throw err;

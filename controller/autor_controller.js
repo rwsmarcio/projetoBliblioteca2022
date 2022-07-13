@@ -1,74 +1,84 @@
-const autorRepository = require('../repository/autor_repository');
+//////////////////////////////////////////////////////////////////////////
 
+const autorNegocio = require('../negocio/autor_negocio');
 
-exports.listar = (req, res) => {    
-    autorRepository.listar((err, listaAutores) => {
-        if(err) { 
-            res.status(500).json({ msg: err.msg }) 
-        }
-        else {
-            res.json(listaAutores);
-        }
-    })
-}
+//////////////////////////////////////////////////////////////////////////
 
-
-exports.buscarPorId = (req, res) => {
-    const id = req.params.autor_id;
-    autorRepository.buscarPorId (id, (err, autorEncontrado) => {
-        if(err) { 
-            res.status(500).json({ msg: err }) 
-        }
-        else if(autorEncontrado) {
-            res.json(autorEncontrado);
-        }
-        else {
-            res.status(404).json({msg:"Autor não encontrado"});
-        }    
-    });
-}
-
-exports.inserir = (req, res) => {
-    let autor = req.body;
-    if(autor && autor.nome) {
-        autorRepository.inserir(autor, (err, autorInserido) => {
-            if(err) { 
-                res.status(500).json({ msg: err.msg }) 
-            }
-            else {
-                res.status(201).send(autor);
-            }
-        });    
-    }
-    else {
-        //Bad Request
-        res.status(400).json({msg:"Entrada de dados invalida"});
+exports.listar = async (req, res) => {    
+    try{
+        const listaAutores = await autorNegocio.listar();
+        res.json(listaAutores);
+    } catch (err) {
+        res.status(500).jason({error: err});
     }
 }
 
-exports.atualizar = (req, res) => {
-    const id = req.params.autor_id;
-    const autorAtualizar = req.body;
+//////////////////////////////////////////////////////////////////////////
 
-    autorRepository.atualizar(id, autorAtualizar, (err, autorAtualizado) => {
-        if(err) { 
-            res.status(500).json({ msg: err }) 
+exports.inserir = async (req, res) => {
+    const autor = req.body;
+    try{
+        const autorInserido = await autorNegocio.inserir(autor);
+        res.status(201).json(autorInserido);
+    }
+    catch(err) {
+        if(err.status) {
+            res.status(err.status).json(err);
+        } else {
+            res.status(400).json({msg:"Entrada de dados invalida"});
         }
-        else {
-            res.json(autorAtualizado);
-        }        
-    })
+    }
 }
 
-exports.deletar = (req, res) => {
-    const id = req.params.autor_id;
+//////////////////////////////////////////////////////////////////////////
 
-    autorRepository.deletar(id, (err, autorAtualizado) => {
-        if(err) { 
-            res.status(500).json({ msg: err.msg }) 
+exports.buscarPorId = async (req, res) => {
+    const id = req.params.autor_id;
+    try{ 
+        const autor = await autorNegocio.buscarPorId(id);
+        res.json(autor);
+    } catch (err) {
+        if (err.status) {
+            res.status(err.status).json(err);
+        } else {
+        res.status(500).json({msg:"Autor não encontrado"});
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+exports.atualizar = async (req, res) => {
+    const id = req.params.autor_id;
+    const autorAtualizacao = req.body;
+
+    try{
+        const autorAtualizado = await autorNegocio.atualizar(id, autorAtualizacao);
+        res.status(201).json(autorAtualizado)
+    } catch(err) {
+        if(err.status) {
+            res.status(err.status).json(err);
         }
         else {
-            res.json(autorAtualizado);
-        }        
-    })
+            res.status(400).json({msg:"Entrada de dados invalida"});            
+        }
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+exports.deletar = async (req, res) => {
+    const id = req.params.autor_id;
+    try{ 
+        const autor = await autorNegocio.deletar(id);
+        res.json(autor);
+    } catch(err) {
+        if (err.status) {
+            res.status(err.status).json(err);
+        } else {
+        res.status(400).json({msg:"Livro inexistente"});
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////

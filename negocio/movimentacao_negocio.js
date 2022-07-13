@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////
 
-const livroRepository = require('../repository/livro_repository');
+const movimentacaoRepository = require('../repository/movimentacao_repository');
 
 //////////////////////////////////////////////////////////////////////////
 
 exports.listar = async () => {
     try { 
-        const listaLivros = await livroRepository.listar();
-        return listaLivros;
+        const listamovimentacoes = await movimentacaoRepository.listar();
+        return listamovimentacoes;
     } catch(err) { 
         throw err; 
     }
@@ -15,11 +15,11 @@ exports.listar = async () => {
 
 //////////////////////////////////////////////////////////////////////////
 
-exports.inserir = async (livro) => {
+exports.inserir = async (movimentacao) => {
     try{
-        if (livro && livro.titulo && livro.autor_id) {
-            const livroInserido = await livroRepository.inserir(livro);
-            return livroInserido;
+        if (movimentacao && movimentacao.usuario_id && movimentacao.livro_id && movimentacao.data_retirada) {
+            const movimentacaoInserida = await movimentacaoRepository.inserir(movimentacao);
+            return movimentacaoInserida;
         } else {
             let error = {}
             error.name = "Nogocio error";
@@ -36,14 +36,14 @@ exports.inserir = async (livro) => {
 
 exports.buscarPorId = async (id) => {
     try {
-        const livro = await livroRepository.buscarPorId(id);
-        if (!livro) {
+        const movimentacao = await movimentacaoRepository.buscarPorId(id);
+        if (!movimentacao) {
             let error = {};
-            error.mensagem = "Livro não encontrado";
+            error.mensagem = "Movimentacao não encontrada";
             error.status = 404;
             throw error;
         } else {
-            return livro;
+            return movimentacao;
         }
     } catch(err) {
         throw err;
@@ -52,13 +52,13 @@ exports.buscarPorId = async (id) => {
 
 //////////////////////////////////////////////////////////////////////////
 
-exports.buscarPorAutor = async (id) => {
+exports.buscarPorUsuario = async (id) => {
     try {
-        const obra = await livroRepository.buscarPorAutor(id);
-        if (!obra) {
+        const resultado = await movimentacaoRepository.buscarPorUsuario(id);
+        if (!resultado) {
             throw err;
         } else {
-            return obra;
+            return resultado;
         }
     } catch(err) {
         throw err;
@@ -67,15 +67,15 @@ exports.buscarPorAutor = async (id) => {
 
 //////////////////////////////////////////////////////////////////////////
 
-exports.atualizar = async (id, livroAtualizacao) => {
+exports.atualizar = async (id, movimentacaoAtualizacao) => {
     try {
-        if (livroAtualizacao && livroAtualizacao.titulo){
-        const livroAtualizado = await livroRepository.atualizar(id, livroAtualizacao);
-        return livroAtualizado;
+        if (movimentacaoAtualizacao && movimentacaoAtualizacao.usuario_id && movimentacaoAtualizacao.livro_id && movimentacaoAtualizacao.data_retirada && movimentacaoAtualizacao.data_devolucao){
+        const movimentacaoAtualizada = await movimentacaoRepository.atualizar(id, movimentacaoAtualizacao);
+        return movimentacaoAtualizada;
         } else {
             let error = {};
             error.name = "Negocio error";
-            error.mensagem = "Entrada de Dados inválida";
+            error.mensagem = "Entrada de dados inválida";
             error.status = 404;
             throw error;
         }
@@ -88,12 +88,12 @@ exports.atualizar = async (id, livroAtualizacao) => {
 
 exports.deletar = async (id) => {
     try {
-        const livro = await livroRepository.deletar(id);
-        if(!livro){
+        const movimentacao = await movimentacaoRepository.deletar(id);
+        if(!movimentacao){
             throw err;
         }
         else {
-            return livro;
+            return movimentacao;
         };
     } catch(err) {
         throw err;
